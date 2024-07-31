@@ -44,13 +44,57 @@ void readKernel(kernel k) {
 	}
 }
 
-image convolution(image *img, kernel k) {
+image convolution(int* input_image[], kernel k) {
+
+	int i, j, m, n;
+	int sum;
+	int width = 5;
+	int height = 5;
 	
-	int middle_x = (k.size - 1) / 2;
-	int i;
-	int accumulator = 0;
+	image img;
+	img.width = width;
+	img.height = height;
 	
-	for (i = 0; i < width; i++) {
-		
+	img.data = (int **)(malloc(sizeof(int *) * height));
+	
+	for (i = 0; i < height; i++) {
+		img.data[i] = (int *)(malloc(sizeof(int) * width));
 	}
+	
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			sum = 0;
+			for (m = 0; m < k.size; m++) {
+				for (n = 0; n < k.size; n++) {
+					if (i + m < height && j + n < width) {
+						sum += input_image[i + m][j + n] * k.data[m][n];
+					}
+				}
+			}
+			img.data[i][j] = sum;
+		}
+	}
+	
+	return img;
+
+}
+
+image _loadImage(int** _image, int width, int height) {
+	int i;
+	image img; 
+	img.width = width;
+	img.height = height;
+
+	img.data = (int **)(malloc(sizeof(int *) * height));
+
+	for (i = 0; i < height; i++) {
+		img.data[i] = (int *)(malloc(sizeof(int) * width));
+	}
+
+	for (i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			img.data[i][j] = _image[i][j];
+		}
+	}
+	return img;
 }
