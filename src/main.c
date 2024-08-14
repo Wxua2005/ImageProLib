@@ -4,7 +4,7 @@
 
 int main(){
 	int i, j;
-	kernel k1 = getKernel(3);
+	Kernel k1 = getKernel(3);
 	int **image2;
 
 	int width = 5;
@@ -14,12 +14,14 @@ int main(){
 		image2[i] = (int *)malloc(width * sizeof(int));
 	}
 
-	int values[5][5] = {
-		{1, 2, 3, 4, 5},
-		{6, 7, 8, 9, 10},
-		{11, 12, 13, 14, 15},
-		{16, 17, 18, 19, 20},
-		{21, 22, 23, 24, 25}
+	int values[7][7] = {
+		{1, 1, 3, 2, 0, 1, 1},
+		{1, 1, 3, 2, 0, 1, 1},
+		{2, 2, 1, 0, 1, 3, 3},
+		{1, 1, 3, 2, 1, 1, 1},
+		{2, 2, 0, 2, 3, 2, 2},
+		{1, 1, 3, 1, 2, 1, 1},
+		{1, 1, 3, 1, 2, 1, 1}
 	};
 
 	for (i = 0; i < height; i++) {
@@ -28,14 +30,17 @@ int main(){
 		}
 	}
 
-	image img = convolution(image2, k1);
+	Image img = convolution(image2, k1);
 
+	printf("\n");
 	for (int i = 0; i < img.height; i++) {
 		for (int j = 0; j < img.width; j++) {
 			printf("%d\t", img.data[i][j]);
 		}
 		printf("\n");
 	}
+
+	Release(image2, height);
 
 	return 0;
 }
