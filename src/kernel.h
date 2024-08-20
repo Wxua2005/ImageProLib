@@ -3,7 +3,7 @@
 
 typedef struct {
 	
-	int **data;
+	float **data;
 	int size;
 	
 } Kernel;
@@ -20,7 +20,7 @@ Kernel getKernel(int size);
 
 void readKernel(Kernel k);
 
-Image convolution(int** input_image, Kernel k);
+Image convolution(int** input_image, Kernel k, int width, int height);
 
 Image _loadImage(int** _image, int width, int height);
 
@@ -29,6 +29,6 @@ Image* addPadding(Image* input_image, int padding);
 
 void Release(int **array, int rows);
 
-int readFile(const char *filename, int rows, int cols, int matrix[rows][cols]);
+Image read_image_from_file(const char *filename);
 
 #endif

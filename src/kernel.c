@@ -7,11 +7,11 @@ Kernel getKernel(int size) {
 	Kernel k1;
 	
 	// dynamically allocating outer array
-	int **array = (int **)(malloc(sizeof(int *) * size)); 
+	float **array = (float **)(malloc(sizeof(float *) * size)); 
 	
 	for (i = 0; i < size; i++) {
 		// looping through array and allocating memory
-		array[i] = (int *)(malloc(sizeof(int) * size)); 
+		array[i] = (float *)(malloc(sizeof(float) * size)); 
 		
 	}
 	
@@ -22,7 +22,7 @@ Kernel getKernel(int size) {
 	// Reading values of the kernel from the user
 	for (i = 0; i < size; i++) { 	
 		for (j = 0; j < size; j++) {
-			scanf("%d", &array[i][j]);
+			scanf("%f", &array[i][j]);
 		}
 	}
 	
@@ -48,59 +48,44 @@ void readKernel(Kernel k) {
 	}
 }
 
-Image convolution(int** input_image, Kernel k) {
+Image convolution(int **input_image, Kernel k, int width, int height) {
+    int i, j, m, n;
+    int sum;
 
-	int i, j, m, n;
-	int sum;
-	int width = 5;
-	int height = 5;
-	
-	Image img;
-	img.width = width;
-	img.height = height;
-	
-	img.data = (int **)(malloc(sizeof(int *) * height));
-	
-	for (i = 0; i < height; i++) {
-		img.data[i] = (int *)(malloc(sizeof(int) * width));
-	}
-	
-	for (i = 0; i < height; i++) {
-		for (j = 0; j < width; j++) {
-			sum = 0;
-			for (m = 0; m < k.size; m++) {
-				for (n = 0; n < k.size; n++) {
-					if (i + m < height && j + n < width) {
-						sum += input_image[i + m][j + n] * k.data[m][n];
-					}
-				}
-			}
-			img.data[i][j] = sum;
-		}
-	}
-	
-	return img;
+    // Create an output Image structure
+    Image img;
+    img.width = width;
+    img.height = height;
 
-}
+    // Allocate memory for the output image data
+    img.data = (int **)(malloc(sizeof(int *) * height));
+    for (i = 0; i < height; i++) {
+        img.data[i] = (int *)(malloc(sizeof(int) * width));
+    }
 
-Image _loadImage(int** _image, int width, int height) {
-	int i;
-	Image img; 
-	img.width = width;
-	img.height = height;
+    // Perform convolution
+    for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j++) {
+            sum = 0;
 
-	img.data = (int **)(malloc(sizeof(int *) * height));
+            // Apply the kernel to the current position
+            for (m = 0; m < k.size; m++) {
+                for (n = 0; n < k.size; n++) {
+                    int x = i + m - k.size / 2; // Adjust for the kernel center
+                    int y = j + n - k.size / 2;
 
-	for (i = 0; i < height; i++) {
-		img.data[i] = (int *)(malloc(sizeof(int) * width));
-	}
+                    // Check for boundary conditions
+                    if (x >= 0 && x < height && y >= 0 && y < width) {
+                        sum += input_image[x][y] * k.data[m][n];
+                    }
+                }
+            }
 
-	for (i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
-			img.data[i][j] = _image[i][j];
-		}
-	}
-	return img;
+            img.data[i][j] = sum;
+        }
+    }
+
+    return img;
 }
 
 Image* addPadding(Image* input_image, int padding) {
@@ -143,30 +128,43 @@ void Release(int **array, int rows) {
 	free(array);
 }
 
-int readFile(const char *filename, int rows, int cols, int matrix[rows][cols]) {
+Image read_image_from_file(const char *filename) {
     FILE *fp = fopen(filename, "r");
-
     if (fp == NULL) {
-
-        fprintf(stderr, "Error opening file %s\n", filename);
-        return 1; // Error indicator
-
+        fprintf(stderr, "Error opening file: %s\n", filename);
+        exit(1);
     }
 
-    for (int i = 0; i < rows; ++i) {
+    int width, height;
+    fscanf(fp, "%d %d", &height, &width);
 
-        for (int j = 0; j < cols; ++j) {
+    Image image;
+    image.width = width;
+    image.height = height;
 
-            if (fscanf(fp, "%d", &matrix[i][j]) != 1) {
+    image.data = (int **)malloc(height * sizeof(int *));
+    if (image.data == NULL) {
+        fprintf(stderr, "Memory allocation error\n");
+        exit(1);
+    }
 
-                fprintf(stderr, "Error reading number from file\n");
-                fclose(fp);
-                return 1; // Error indicator
-				
+    for (int i = 0; i < height; i++) {
+        image.data[i] = (int *)malloc(width * sizeof(int));
+        if (image.data[i] == NULL) {
+            fprintf(stderr, "Memory allocation error\n");
+            exit(1);
+        }
+    }
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            if (fscanf(fp, "%d", &image.data[i][j]) != 1) {
+                fprintf(stderr, "Error reading data from file\n");
+                exit(1);
             }
         }
     }
 
     fclose(fp);
-    return 0; // Success
+    return image;
 }

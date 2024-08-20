@@ -5,42 +5,35 @@
 int main(){
 	int i, j;
 	Kernel k1 = getKernel(3);
-	int **image2;
+	
+	Image img1;
 
-	int width = 5;
-	int height = 5;
-	image2 = (int **)malloc(height * sizeof(int *));
-	for (i = 0; i < height; i++) {
-		image2[i] = (int *)malloc(width * sizeof(int));
-	}
+	img1 = read_image_from_file("text1.txt");
 
-	int values[7][7] = {
-		{1, 1, 3, 2, 0, 1, 1},
-		{1, 1, 3, 2, 0, 1, 1},
-		{2, 2, 1, 0, 1, 3, 3},
-		{1, 1, 3, 2, 1, 1, 1},
-		{2, 2, 0, 2, 3, 2, 2},
-		{1, 1, 3, 1, 2, 1, 1},
-		{1, 1, 3, 1, 2, 1, 1}
-	};
-
-	for (i = 0; i < height; i++) {
-		for (j = 0; j < width; j++) {
-			image2[i][j] = values[i][j];
-		}
-	}
-
-	Image img = convolution(image2, k1);
+	Image img2 = convolution(img1.data, k1, 1280, 720);
+	img2.height = 720;
+	img2.width = 1280;
 
 	printf("\n");
-	for (int i = 0; i < img.height; i++) {
-		for (int j = 0; j < img.width; j++) {
-			printf("%d\t", img.data[i][j]);
+	for (int i = 0; i < img2.height; i++) {
+		for (int j = 0; j < img2.width; j++) {
+			printf("%d\t", img2.data[i][j]);
 		}
 		printf("\n");
 	}
 
-	Release(image2, height);
+	FILE *file = fopen("output_image2.txt", "w");
+
+	for (int i = 0; i < img2.height; i++) {
+        for (int j = 0; j < img2.width; j++) {
+            fprintf(file, "%d ", img2.data[i][j]);
+        }
+        fprintf(file, "\n");
+    }
+
+
+	Release(img1.data, img1.height);
+	Release(img2.data, img2.height);
 
 	return 0;
 }
