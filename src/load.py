@@ -1,6 +1,6 @@
 import cv2 as cv
 
-file = cv.imread(r"C:\Users\drpre\OneDrive\Pictures\Camera Roll\WIN_20240608_18_22_45_Pro.jpg",
+file = cv.imread(r"C:\Users\drpre\OneDrive\Pictures\Camera Roll\WIN_20240817_17_02_12_Pro.jpg",
                  cv.IMREAD_GRAYSCALE)
 
 height = file.shape[0]
@@ -16,4 +16,4 @@ with open('text1.txt', 'w') as f:
         f.write("\n")
 
 cv.imshow('Image', file)
-print("Grayscale values have been written to output.txt.")
+print("Grayscale values have been written to text1.txt.")
