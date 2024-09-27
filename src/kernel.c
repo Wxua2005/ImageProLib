@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -42,7 +43,7 @@ void readKernel(Kernel k) {
 	// Displaying values of the kernel
 	for (i = 0; i < k.size; i++) { 	
 		for (j = 0; j < k.size; j++) {
-			printf("%d\t", k.data[i][j]);
+			printf("%f\t", k.data[i][j]);
 		}
 		printf("\n");
 	}
@@ -86,6 +87,35 @@ Image convolution(int **input_image, Kernel k, int width, int height) {
     }
 
     return img;
+}
+
+void* thread_convolution(void* arg) {
+    ThreadData* data = (ThreadData*)arg;
+    int **input_image = data->input_image;
+    int **output_image = data->output_image;
+    Kernel k = data->k;
+    int width = data->width;
+    int height = data->height;
+    int start_row = data->start_row;
+    int end_row = data->end_row;
+
+    for (int i = start_row; i < end_row; i++) {
+        for (int j = 0; j < width; j++) {
+            int sum = 0;
+            for (int m = 0; m < k.size; m++) {
+                for (int n = 0; n < k.size; n++) {
+                    int x = i + m - k.size / 2;
+                    int y = j + n - k.size / 2;
+                    if (x >= 0 && x < height && y >= 0 && y < width) {
+                        sum += input_image[x][y] * k.data[m][n];
+                    }
+                }
+            }
+            output_image[i][j] = sum;
+        }
+    }
+
+    return NULL;
 }
 
 Image* addPadding(Image* input_image, int padding) {
@@ -167,4 +197,36 @@ Image read_image_from_file(const char *filename) {
 
     fclose(fp);
     return image;
+}
+
+Image mul_convolution(int **input_image, Kernel k, int width, int height) {
+    int num_threads = 7; // Number of threads
+    pthread_t threads[num_threads];
+    ThreadData thread_data[num_threads];
+    int rows_per_thread = height / num_threads;
+
+    Image img;
+    img.width = width;
+    img.height = height;
+    img.data = (int **)(malloc(sizeof(int *) * height));
+    for (int i = 0; i < height; i++) {
+        img.data[i] = (int *)(malloc(sizeof(int) * width));
+    }
+
+    for (int i = 0; i < num_threads; i++) {
+        thread_data[i].input_image = input_image;
+        thread_data[i].output_image = img.data;
+        thread_data[i].k = k;
+        thread_data[i].width = width;
+        thread_data[i].height = height;
+        thread_data[i].start_row = i * rows_per_thread;
+        thread_data[i].end_row = (i == num_threads - 1) ? height : (i + 1) * rows_per_thread;
+        pthread_create(&threads[i], NULL, thread_convolution, &thread_data[i]);
+    }
+
+    for (int i = 0; i < num_threads; i++) {
+       //pthread_join(threads[i], NULL);
+    }
+
+    return img;
 }

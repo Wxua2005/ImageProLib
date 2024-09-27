@@ -23,7 +23,6 @@ def read_image_from_text_file(file_path):
 file_path = 'output_image2.txt' 
 image_array = read_image_from_text_file(file_path)
 
-print("Image shape:", image_array.shape)
 cv.imwrite('output_image2.jpg', image_array)
 cv.imshow('Image', image_array)
 cv.waitKey(0)
