@@ -2,12 +2,10 @@ import cv2 as cv
 import argparse
 import sys
 
-# Set up argument parser
 parser = argparse.ArgumentParser(description='Process an image and save its grayscale values to a text file.')
 parser.add_argument('image_path', type=str, help='Path to the image file')
 args = parser.parse_args()
 
-# Read the image from the provided path
 file = cv.imread(args.image_path, cv.IMREAD_GRAYSCALE)
 
 if file is None:

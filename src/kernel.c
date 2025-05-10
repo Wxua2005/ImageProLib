@@ -200,7 +200,7 @@ Image read_image_from_file(const char *filename) {
 }
 
 Image mul_convolution(int **input_image, Kernel k, int width, int height) {
-    int num_threads = 7; // Number of threads
+    int num_threads = 7; 
     pthread_t threads[num_threads];
     ThreadData thread_data[num_threads];
     int rows_per_thread = height / num_threads;

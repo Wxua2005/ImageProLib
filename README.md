@@ -13,7 +13,7 @@ and is made using only pure C.
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/edge-detection-library.git
+git clone https://github.com/Wxua2005/ImageProLib.git
 ```
 ## Compiling
 
